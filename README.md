@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BloomWatch: Global Flowering Phenology Tracker
 
-## Getting Started
 
-First, run the development server:
+## Introduction
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+BloomWatch is an **interactive web application** designed to visualize, in real-time (using simulated and semi-real data), the flowering **phenology** and its intensity across multiple regions of the world.
+
+This project's main objective is to offer a dynamic tool for monitoring flowering events (such as **superblooms** or key crop flowering) and to provide **actionable insights** for agricultural management, conservation, and climate study.
+
+
+## Key Features
+
+  - **Dynamic Geospatial Visualization**: Displays flowering intensity using **GeoJSON** data on an interactive map.
+
+  - **Clustering**: Nearby points are automatically grouped, showing the concentration of blooms in specific regions (example: dense clusters in the **South African Fynbos**, the **Central Valley of Chile**, and **Loja, Ecuador**).
+
+  - **Alerts and Insights**: Provides a critical alerts (*insights*) panel related to late or early flowering, pests, or pollen forecasts.
+
+  - **Data Scalability**: Structured to process and visualize large collections of type **FeatureCollection**.
+
+
+## Technologies Used
+
+This project is a **Frontend** application built with the following tools:
+
+  - **Framework**: Next.js.
+  - **Map Visualization**: Leaflet and Sentinel satellite imagery.
+  - **State Management**: Context API
+  - **Charts**: Chart.js
+  - **Animations**: Three.js
+  - **Language**: TypeScript
+
+
+## Installation and Execution
+
+Follow these steps to run the project in your local environment:
+
+**Clone the repository:**
+
+```
+git clone [REPO-URL] florawatch-frontend
+cd florawatch-frontend
+
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Install dependencies:**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+npm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Run the application in development mode:**
 
-## Learn More
+```
+npm start
+```
 
-To learn more about Next.js, take a look at the following resources:
+The application should open automatically in your browser at `http://localhost:3000`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+-----
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Data Context and Sources (EO Data)
 
-## Deploy on Vercel
+Although the application uses mock data for demonstration (`mockBloomData`), its design is optimized to integrate real **Earth Observation (EO)** data.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The coordinates and information structure are inspired by the potential of high-resolution satellite programs, such as:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **NASA Earth Observations**: Used for tracking vegetation phenology.
+
+- **RADARSAT Constellation Mission (RCM)**: The potential of **SAR** (Synthetic Aperture Radar) data from satellites like **RADARSAT-1** and **RCM** to monitor ecosystems (forests, crops) in any weather condition is key to detecting changes in the land cover related to flowering.
