@@ -1,27 +1,33 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Stars, Html } from "@react-three/drei";
-import React, { useRef, useState, useEffect } from "react";
+import { Canvas, useFrame, useLoader } from "@react-three/fiber";
+// Se eliminó 'Html' de las importaciones de '@react-three/drei' ya que no se estaba utilizando,
+// lo cual puede evitar conflictos de dependencias en el proceso de renderizado (Turbopack/Next.js).
+import { OrbitControls, Stars } from "@react-three/drei";
+import React, { useRef, useState } from "react";
 import * as THREE from "three";
 
-// Asegúrate de que esta imagen esté en public/
-const earthTexture = new THREE.TextureLoader().load("/earth_atmos_2048.jpg");
+
 
 function RotatingEarth() {
+  // 1. Usamos el hook useLoader para cargar la textura de forma segura en el cliente.
+  const earthTexture = useLoader(THREE.TextureLoader, "/earth_atmos_2048.jpg");
+  
   const earthRef = useRef<THREE.Mesh>(null!);
   const [hovered, setHovered] = useState(false);
 
   // Animación de rotación continua de la Tierra
   useFrame(() => {
-    earthRef.current.rotation.y += 0.002;
+    if (earthRef.current) {
+      earthRef.current.rotation.y += 0.002;
+    }
   });
 
   return (
     <mesh
       ref={earthRef}
-      onPointerOver={(event) => setHovered(true)}
-      onPointerOut={(event) => setHovered(false)}
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}
       scale={hovered ? 1.05 : 1} 
     >
       <sphereGeometry args={[2, 64, 64]} />
@@ -29,8 +35,8 @@ function RotatingEarth() {
         map={earthTexture}
         
         // AJUSTES DEL MATERIAL
-        metalness={0.0}  // La Tierra no es metálica
-        roughness={1.0}  // La Tierra no es brillante
+        metalness={0.0} // La Tierra no es metálica
+        roughness={1.0} // La Tierra no es brillante
         emissive={new THREE.Color(0x000000)} 
         emissiveIntensity={0.05} // Sutil brillo del lado oscuro
       />
