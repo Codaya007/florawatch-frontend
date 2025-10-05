@@ -4,18 +4,23 @@ import InfoCard from './InfoCard';
 import { ToggleSwitch } from './ToggleSwitch';
 import { mockInsights } from '@/data/mocks';
 import SearchAndFilterSection from './SearchAndFilterSection';
+import { DateRange } from '@/app/explore/page';
 
 interface SidebarProps {
+  dateRange: DateRange;
+  setDateRange: (range: DateRange) => void;
   isGlobalView: boolean;
   setIsGlobalView: (isGlobal: boolean) => void;
   onPlaceSelect: (lat: number, lng: number) => void; 
+  layer?: string;
+  setLayer?: (layer: string) => void;
 }
 
-export default function Sidebar({ isGlobalView, setIsGlobalView, onPlaceSelect }: SidebarProps) {
+export default function Sidebar({ isGlobalView, setIsGlobalView, onPlaceSelect, dateRange, setDateRange, layer, setLayer }: SidebarProps) {
   const [isPredictiveModelActive, setIsPredictiveModelActive] = useState(false);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 secondary-bg">
       {/* 1. Switch de Vista Global/Local */}
       <InfoCard title="Map View">
         <ToggleSwitch 
@@ -27,9 +32,13 @@ export default function Sidebar({ isGlobalView, setIsGlobalView, onPlaceSelect }
 
       {/* 2. FILTROS Y BÚSQUEDA */}
       <SearchAndFilterSection 
-        isGlobalView={isGlobalView}
-        onPlaceSelect={onPlaceSelect} 
-      />
+        isGlobalView={isGlobalView}
+        onPlaceSelect={onPlaceSelect} 
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+        layer={layer}
+        setLayer={setLayer}
+      />
 
       {/* 3. INSIGHTS */}
       <InfoCard title="Bloom Insights (Actionable)">

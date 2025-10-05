@@ -1,39 +1,124 @@
+/* Importaciones Esenciales */
+
+/* Fira Sans (400, 700, 900) y Overpass (400, 700, Italic) */
+@import url("https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;700;900&family=Overpass:ital,wght@0,400;0,700;1,400&display=swap");
+
 @import "tailwindcss";
-/* Desde aquí */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import 'leaflet/dist/leaflet.css'; 
+@import "leaflet/dist/leaflet.css";
 
-/* Establece el fondo oscuro por defecto */
-body {
-  @apply bg-gray-900 text-gray-100 antialiased;
-}
-/* Hasta aquí */
-
+/* Variables CSS Nativas (Temas y Tipografía) */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+    /* Paleta de Colores de NASA Space Apps */
+    --color-deep-blue: #07173F;
+    --color-electric-blue: #0042A6;
+    --color-neon-blue: #0960E1;
+    --color-blue-yonder: #2E96F5;
+    --color-neon-yellow: #EAFE07;
+    --color-white: #ececec;
+    
+    /* Variables de Tema (Dark Mode por defecto) */
+    --background: var(--color-deep-blue);
+    --foreground: var(--color-white);
+
+    /* Definición de Familias de Fuentes */
+    --font-title: 'Fira Sans', sans-serif;
+    --font-body: 'Overpass', sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Modo Claro (Light Mode) */
+@media (prefers-color-scheme: light) {
+    :root {
+        /* Fondo: White */
+        --background: var(--color-white); 
+        /* Texto: Deep Blue (para contraste en fondo claro) */
+        --foreground: var(--color-deep-blue);
+    }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* Estilos Base del Body (Aplica las Variables) */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+    /* Usa las variables de tema */
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-body);
+    
+    /* Aplica utilidades básicas de Tailwind */
+    @apply antialiased; 
+}
+
+
+/* Estilos de Títulos y Encabezados (Titles & Headings) */
+
+/* Estilo general de encabezados (h1-h6) */
+h1, h2, h3, h4, h5, h6 {
+    /* Fuente de Títulos: Fira Sans */
+    font-family: var(--font-title);
+    /* Por defecto, Fira Sans Black (900) */
+    font-weight: 900; 
+    color: var(--color-white);
+}
+
+/* Encabezados Principales (H1, H2) - Usan Neon Blue */
+h1, h2 {
+    font-weight: 900; /* Fira Sans Black */
+}
+
+/* Encabezados Secundarios (H3, H4) - Usan Overpass Bold */
+h3, h4 {
+    font-family: var(--font-body); /* Overpass */
+    font-weight: 700; /* Overpass Bold */
+}
+
+
+/* Estilos de Cuerpo de Texto (Body Copy) */
+
+/* Negrita (Strong, B) - Usa Overpass Bold (700) */
+strong, b {
+    font-weight: 700;
+}
+
+/* Cursiva (Emphasis, I) - Usa Overpass Italic (1,400) */
+em, i {
+    font-style: italic;
+    /* Asegura que el italic use el peso regular si no se especifica */
+    font-weight: 400; 
+}
+
+.primary-bg {
+    background-color: var(--color-deep-blue);
+}
+
+.secondary-bg {
+    background-color: var(--color-white);
+}
+
+
+
+/* LANDING */
+/* globals.css */
+@keyframes pulseGlow {
+  0%, 100% { text-shadow: 0 0 10px #4ade80, 0 0 20px #4ade80; }
+  50% { text-shadow: 0 0 20px #86efac, 0 0 40px #86efac; }
+}
+.glow {
+  animation: pulseGlow 3s infinite ease-in-out;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    text-shadow: 0 0 20px #4ade80, 0 0 40px #4ade80;
+  }
+  50% {
+    text-shadow: 0 0 10px #86efac, 0 0 20px #86efac;
+  }
+}
+.glow {
+  animation: glowPulse 3s infinite ease-in-out;
 }

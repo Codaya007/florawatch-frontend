@@ -3,17 +3,22 @@ import React, { useEffect, useState, useRef } from 'react';
 import InfoCard from './InfoCard';
 import { searchPlaces } from '@/services/places.service'; 
 import { ToggleSwitch } from './ToggleSwitch';
+import { DateRange } from '@/app/explore/page';
 
 interface SearchAndFilterProps {
   isGlobalView: boolean;
-  onPlaceSelect: (lat: number, lng: number) => void; 
+  onPlaceSelect: (lat: number, lng: number) => void;
+  dateRange: DateRange;
+  setDateRange: (range: DateRange) => void;
+  layer?: string;
+  setLayer?: (layer: string) => void;
 }
 
-export default function SearchAndFilterSection({ isGlobalView, onPlaceSelect }: SearchAndFilterProps) {
-  const defaultDate = new Date().toLocaleDateString('en-CA');
+
+
+export default function SearchAndFilterSection({ isGlobalView, onPlaceSelect, dateRange, setDateRange, layer, setLayer = () => {} }: SearchAndFilterProps) {
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [range, setRange] = useState<{ start: string; end: string }>({ start: defaultDate, end: defaultDate });
   const [activeRange, setActiveRange] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   
@@ -22,7 +27,8 @@ export default function SearchAndFilterSection({ isGlobalView, onPlaceSelect }: 
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>, type: "start" | "end") => {
     const { value } = e.target;
-    setRange(prev => ({ ...prev, [type]: value }));
+    // @ts-ignore
+    setDateRange((prev: DateRange) => ({ ...prev, [type]: value }));
   };
 
   const handleSuggestionClick = (suggestion: any) => {
@@ -110,7 +116,7 @@ export default function SearchAndFilterSection({ isGlobalView, onPlaceSelect }: 
           </label>
           <input 
             type="date" 
-            value={range.start} 
+            value={dateRange.start || ""} 
             className="w-full p-2 rounded-lg bg-[#2D3748] border border-[#4A5568] text-gray-100 focus:ring-[#38B2AC] focus:border-[#38B2AC]"
             onChange={(e) => handleDateChange(e, "start")}
           />
@@ -124,13 +130,25 @@ export default function SearchAndFilterSection({ isGlobalView, onPlaceSelect }: 
             </label>
             <input 
               type="date" 
-              value={range.end} 
+              value={dateRange.end || ""} 
               className="w-full p-2 rounded-lg bg-[#2D3748] border border-[#4A5568] text-gray-100 focus:ring-[#38B2AC] focus:border-[#38B2AC]"
               onChange={(e) => handleDateChange(e, "end")}
             />
           </div>
         )}
       </div>
+
+      <select
+        onChange={(e) => setLayer(e.target.value)}
+        className="bg-[#0B1A3E] text-white p-2 rounded-md w-full mt-2"
+        defaultValue={layer}
+      >
+        <option value="MODIS_Terra_CorrectedReflectance_TrueColor">True Color</option>
+        <option value="MODIS_Terra_CorrectedReflectance_Bands721">Vegetation</option>
+        <option value="MODIS_Aqua_Chlorophyll_A">Chlorophyll</option>
+        <option value="MODIS_Terra_Land_Surface_Temp_Day">Surface Temperature</option>
+      </select>
+
     </InfoCard>
   );
 }
