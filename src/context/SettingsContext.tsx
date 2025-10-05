@@ -1,7 +1,7 @@
 "use client";
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-type RoleType = "guest" | "researcher" | "farmer" | "health" | "admin";
+type RoleType = "guest" | "researcher" | "farmer" | "health";
 
 interface SettingsContextType {
   role: RoleType;
