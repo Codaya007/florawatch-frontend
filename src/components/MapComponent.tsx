@@ -6,12 +6,15 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { mockBloomData } from '@/data/mocks';
 
+import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
+import iconUrl from 'leaflet/dist/images/marker-icon.png';
+import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
+
 // Corrige el problema de los íconos de Leaflet en React (necesario)
-delete L.Icon.Default.prototype._get  
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: '/leaflet/marker-icon-2x.png',
-  iconUrl: '/leaflet/marker-icon.png',
-  shadowUrl: '/leaflet/marker-shadow.png',
+  iconRetinaUrl: iconRetinaUrl.src,
+  iconUrl: iconUrl.src,
+  shadowUrl: shadowUrl.src,
 });
 
 interface TargetLocation {
