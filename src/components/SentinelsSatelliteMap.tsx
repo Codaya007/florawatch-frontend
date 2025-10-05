@@ -6,10 +6,12 @@ import "leaflet/dist/leaflet.css";
 import { MapContainer, GeoJSON, useMap } from "react-leaflet";
 import { WMSTileLayer } from "react-leaflet";
 import { mockBloomData } from "@/data/mocks";
+// NOTE: These constants are no longer needed here, but kept for clarity
+// in case they are used elsewhere. The proxy uses environment variables.
 import {
   SENTINEL_INSTANCE_ID,
-  SENTINEL_CLIENT_ID,
-  SENTINEL_CLIENT_SECRET,
+  //  SENTINEL_CLIENT_ID,
+  //  SENTINEL_CLIENT_SECRET,
 } from "@/constants";
 
 delete (L.Icon.Default.prototype as any)._get;
@@ -42,34 +44,33 @@ const useSentinelAuth = () => {
       try {
         setIsLoading(true);
 
-        const body = new URLSearchParams({
-          client_id: SENTINEL_CLIENT_ID,
-          client_secret: SENTINEL_CLIENT_SECRET,
-          grant_type: "client_credentials",
+        // CAMBIO CLAVE: Llamar al endpoint proxy interno, no a la URL externa.
+        // Esto evita el error CORS al ejecutarse en el lado del servidor.
+        const response = await fetch("/api/sentinel-token", {
+          method: "POST",
+          // Nota: No se envían credenciales en el body,
+          // ya que el proxy las carga desde process.env
+          headers: {
+            "Content-Type": "application/json",
+          },
+          // Body vacío o con datos de mock, solo para usar el método POST en el proxy
+          body: JSON.stringify({}),
         });
 
-        const response = await fetch(
-          "https://services.sentinel-hub.com/auth/realms/main/protocol/openid-connect/token",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
-            },
-            body: body.toString(),
-          }
-        );
-
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorData = await response.json();
+          throw new Error(
+            errorData.error || `HTTP error! status: ${response.status}`
+          );
         }
 
         const data = await response.json();
         setToken(data.access_token);
         setError(null);
-        console.log("✅ Token obtenido exitosamente");
-      } catch (err) {
-        console.error("Error fetching Sentinel Hub token:", err);
-        setError("Failed to authenticate with Sentinel Hub");
+        console.log("✅ Token obtenido exitosamente vía proxy");
+      } catch (err: any) {
+        console.error("Error fetching Sentinel Hub token:", err.message);
+        setError(err.message || "Failed to authenticate with Sentinel Hub");
       } finally {
         setIsLoading(false);
       }
@@ -171,7 +172,7 @@ export default function SentinelsSatelliteMap({
           fontSize: "16px",
         }}
       >
-        🛰️ Autenticando con Sentinel Hub...
+        🛰️ Authenticating with Sentinel Hub...
       </div>
     );
   }
@@ -194,13 +195,13 @@ export default function SentinelsSatelliteMap({
       >
         <div>
           <div style={{ fontSize: "18px", marginBottom: "10px" }}>
-            ⚠️ Error de autenticación
+            ⚠️ Authentication Error
           </div>
           <div style={{ fontSize: "14px" }}>{error}</div>
           <div
             style={{ fontSize: "12px", marginTop: "10px", color: "#A0AEC0" }}
           >
-            Verifica tus credenciales de Sentinel Hub
+            Please check your Sentinel Hub credentials.
           </div>
         </div>
       </div>
@@ -235,9 +236,9 @@ export default function SentinelsSatelliteMap({
         onEachFeature={(feature: any, layer: any) => {
           if (feature.properties && feature.properties.region) {
             layer.bindPopup(
-              `🌿 Floración: ${
+              `🌿 Bloom: ${
                 feature.properties.region
-              }<br/>Intensidad: ${feature.properties.intensity.toUpperCase()}`
+              }<br/>Intensity: ${feature.properties.intensity.toUpperCase()}`
             );
           }
         }}

@@ -4,24 +4,24 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import Sidebar from "@/components/Sidebar";
 import dayjs from "dayjs";
-import SentinelsSatelliteMap from '@/components/SentinelsSatelliteMap';
-import SatelliteMap from "@/components/SatelliteMap";
+// import SentinelsSatelliteMap from '@/components/SentinelsSatelliteMap';
+// import SatelliteMap from "@/components/SatelliteMap";
 import { useSettings } from "@/context/SettingsContext";
 
-// const MapComponent = dynamic(() => import('@/components/MapComponent'), { ssr: false });
+const MapComponent = dynamic(() => import('@/components/MapComponent'), { ssr: false });
 const ClientOnlyTimeSeriesChart = dynamic(
   () => import("@/components/ClientOnlyTimeSeriesChart"),
   { ssr: false }
 );
 
 // 1. Importación dinámica del componente del mapa. Asegura que SentinelsSatelliteMap solo se cargue en el navegador
-const DynamicSentinelsSatelliteMap = dynamic(
- () => import('../../components/SentinelsSatelliteMap'), // Asegúrate que la ruta sea correcta
- {
-  ssr: false, // ¡Esta es la clave para solucionar el error!
-  loading: () => <p>Cargando Mapa...</p>, // Opcional: Un indicador de carga
- }
-);
+// const DynamicSentinelsSatelliteMap = dynamic(
+//  () => import('../../components/SentinelsSatelliteMap'), // Asegúrate que la ruta sea correcta
+//  {
+//   ssr: false, // ¡Esta es la clave para solucionar el error!
+//   loading: () => <p>Cargando Mapa...</p>, // Opcional: Un indicador de carga
+//  }
+// );
 
 export interface DateRange {
   start: string | null;
@@ -74,13 +74,14 @@ export default function HomePage() {
     <div className="flex flex-1 overflow-hidden">
       {/* Área Central: Mapa y Gráfico de Intensidad */}
       <div className="secondary-bg flex flex-col flex-grow p-4 space-y-4 overflow-hidden">
+        
         {/* Mapa Global: Pasamos el estado */}
-        {/* <div className={`flex-1 min-h-0 rounded-xl overflow-hidden border border-white`}>
+        <div className={`flex-1 min-h-0 rounded-xl overflow-hidden border border-white`}>
      <MapComponent 
       targetLocation={targetLocation} 
       isGlobalView={isGlobalView} 
      /> 
-    </div> */}
+    </div>
 
         {/* MAPA SATELITAL */}
         {/* <div
@@ -95,13 +96,13 @@ export default function HomePage() {
         </div> */}
 
         {/* MAPA SATELITAL CON CAPA DE SENTINELS */}
-        <div style={{ height: '80vh', width: '100%' }}>
+        {/* <div style={{ height: '80vh', width: '100%' }}>
           <DynamicSentinelsSatelliteMap 
             targetLocation={targetLocation} 
             isGlobalView={isGlobalView} 
             selectedDate={getSentinelDateString(dateRange)}
           />
-        </div>
+        </div> */}
 
         {/* Gráfico de Series Temporales */}
         <div
