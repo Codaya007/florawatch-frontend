@@ -1,12 +1,16 @@
 "use client";
 
 import L from "leaflet";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import { MapContainer, GeoJSON, useMap } from "react-leaflet";
 import { WMSTileLayer } from "react-leaflet";
 import { mockBloomData } from "@/data/mocks";
-import { SENTINEL_INSTANCE_ID } from "@/constants";
+import {
+  SENTINEL_INSTANCE_ID,
+  SENTINEL_CLIENT_ID,
+  SENTINEL_CLIENT_SECRET,
+} from "@/constants";
 
 delete (L.Icon.Default.prototype as any)._get;
 L.Icon.Default.mergeOptions({
@@ -24,11 +28,64 @@ interface TargetLocation {
 interface SatelliteMapProps {
   isGlobalView: boolean;
   targetLocation: TargetLocation | null;
-  // selectedDate ahora puede ser una fecha simple (YYYY-MM-DD) o un rango (YYYY-MM-DD/YYYY-MM-DD)
   selectedDate: string;
 }
 
-// Determinamos color según intensidad
+// Hook personalizado para obtener el token OAuth
+const useSentinelAuth = () => {
+  const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        setIsLoading(true);
+
+        const body = new URLSearchParams({
+          client_id: SENTINEL_CLIENT_ID,
+          client_secret: SENTINEL_CLIENT_SECRET,
+          grant_type: "client_credentials",
+        });
+
+        const response = await fetch(
+          "https://services.sentinel-hub.com/auth/realms/main/protocol/openid-connect/token",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+            },
+            body: body.toString(),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setToken(data.access_token);
+        setError(null);
+        console.log("✅ Token obtenido exitosamente");
+      } catch (err) {
+        console.error("Error fetching Sentinel Hub token:", err);
+        setError("Failed to authenticate with Sentinel Hub");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchToken();
+
+    // Renovar token cada 50 minutos (los tokens duran 1 hora)
+    const interval = setInterval(fetchToken, 50 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return { token, isLoading, error };
+};
+
 const pointToLayer = (feature: any, latlng: L.LatLng) => {
   let color = "#1ff249";
   if (feature.properties.intensity === "high") color = "#F56565";
@@ -44,7 +101,6 @@ const pointToLayer = (feature: any, latlng: L.LatLng) => {
   });
 };
 
-// Para controlar el mapa (global/local/flyTo)
 const MapUpdater = ({
   isGlobalView,
   targetLocation,
@@ -71,48 +127,85 @@ const MapUpdater = ({
   return null;
 };
 
-// Mapa Satelital Sentinel-2 L2A
 export default function SentinelsSatelliteMap({
   isGlobalView,
   targetLocation,
-  selectedDate, // 'YYYY-MM-DD' o 'YYYY-MM-DD/YYYY-MM-DD'
+  selectedDate,
 }: SatelliteMapProps) {
-//   const SENTINEL_LAYER_ID = "FALSE-COLOR";
+  const { token, isLoading, error } = useSentinelAuth();
   const SENTINEL_LAYER_ID = "NATURAL-COLOR";
-
   const defaultCenter: [number, number] = [30, 0];
-  const defaultZoom = 1; // Un zoom inicial más global
+  const defaultZoom = 1;
 
-  // Construcción de la URL de WMS de Sentinel Hub.
-  // MOSAICKINGORDER=leastCC para obtener la mejor imagen (menor nubosidad)
-  const sentinelUrl = `https://services.sentinel-hub.com/ogc/wms/${SENTINEL_INSTANCE_ID}`;
+  // Construcción de la URL de WMS con el token
+  const sentinelUrl = token
+    ? `https://services.sentinel-hub.com/ogc/wms/${SENTINEL_INSTANCE_ID}?access_token=${token}`
+    : `https://services.sentinel-hub.com/ogc/wms/${SENTINEL_INSTANCE_ID}`;
 
-  console.log({selectedDate});
+  console.log({ selectedDate, hasToken: !!token });
 
-  // Parámetros de la solicitud WMS/WMTS
   const wmsParams = {
-    layers: SENTINEL_LAYER_ID, 
+    layers: SENTINEL_LAYER_ID,
     format: "image/jpeg",
     transparent: true,
-    // Parámetros específicos de Sentinel Hub
-    // 1. RANGO DE TIEMPO: Le dice a Sentinel Hub qué imágenes buscar.
-    time: selectedDate, // Ejemplo: '2024-09-01/2024-09-30' o '2024-09-15'
-
-    // 2. FILTRADO: Seleccionar la imagen con menos nubes
-    // con 'leastCC' (least Cloud Coverage)
-    // La cobertura máxima (maxcc) se puede añadir, pero por defecto 100%
-    // maxcc: 20, // Solo usar tiles con 20% o menos de nubes
+    time: selectedDate,
     maxcc: 100,
-
-    // 3. Orden de mosaico: 'leastCC' toma el pixel del tile con la menor cobertura de nubes.
-    // Si se usa un rango de fechas, esto busca la mejor imagen en ese rango.
-    // Si se usa una sola fecha, simplemente usa la mejor adquisición disponible ese día.
     custom: `MOSAICKINGORDER=leastCC`,
-
     service: "WMS",
     request: "GetMap",
     version: "1.3.0",
   };
+
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          backgroundColor: "#0B1A3E",
+          borderRadius: "12px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+          fontSize: "16px",
+        }}
+      >
+        🛰️ Autenticando con Sentinel Hub...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          backgroundColor: "#0B1A3E",
+          borderRadius: "12px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#F56565",
+          padding: "20px",
+          textAlign: "center",
+        }}
+      >
+        <div>
+          <div style={{ fontSize: "18px", marginBottom: "10px" }}>
+            ⚠️ Error de autenticación
+          </div>
+          <div style={{ fontSize: "14px" }}>{error}</div>
+          <div
+            style={{ fontSize: "12px", marginTop: "10px", color: "#A0AEC0" }}
+          >
+            Verifica tus credenciales de Sentinel Hub
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <MapContainer
@@ -120,7 +213,7 @@ export default function SentinelsSatelliteMap({
       center={defaultCenter}
       zoom={defaultZoom}
       minZoom={1}
-      maxZoom={18} // Sentinel-2 tiene mucho más zoom (hasta 10m de resolución)
+      maxZoom={18}
       style={{
         height: "100%",
         width: "100%",
@@ -129,14 +222,13 @@ export default function SentinelsSatelliteMap({
       }}
       scrollWheelZoom={true}
     >
-        <WMSTileLayer
-        url={sentinelUrl} // Usamos solo la URL base
+      <WMSTileLayer
+        url={sentinelUrl}
         attribution='&copy; <a href="http://www.sentinel-hub.com/" target="_blank">Sentinel Hub</a> | Contains modified Copernicus Sentinel data'
-        params={wmsParams} // Pasamos todos los parámetros WMS/Sentinel Hub aquí
+        params={wmsParams}
         maxZoom={18}
-        />
+      />
 
-      {/* TODO: Capa de floración (GeoJSON simulada) */}
       <GeoJSON
         data={mockBloomData as any}
         pointToLayer={pointToLayer}

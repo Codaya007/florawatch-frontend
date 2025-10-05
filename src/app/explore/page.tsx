@@ -4,7 +4,7 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import Sidebar from "@/components/Sidebar";
 import dayjs from "dayjs";
-// import SentinelsSatelliteMap from '@/components/SentinelsSatelliteMap';
+import SentinelsSatelliteMap from '@/components/SentinelsSatelliteMap';
 import SatelliteMap from "@/components/SatelliteMap";
 import { useSettings } from "@/context/SettingsContext";
 
@@ -14,14 +14,14 @@ const ClientOnlyTimeSeriesChart = dynamic(
   { ssr: false }
 );
 
-// // 1. Importación dinámica del componente del mapa. Asegura que SentinelsSatelliteMap solo se cargue en el navegador
-// const DynamicSentinelsSatelliteMap = dynamic(
-//  () => import('../components/SentinelsSatelliteMap'), // Asegúrate que la ruta sea correcta
-//  {
-//   ssr: false, // ¡Esta es la clave para solucionar el error!
-//   loading: () => <p>Cargando Mapa...</p>, // Opcional: Un indicador de carga
-//  }
-// );
+// 1. Importación dinámica del componente del mapa. Asegura que SentinelsSatelliteMap solo se cargue en el navegador
+const DynamicSentinelsSatelliteMap = dynamic(
+ () => import('../../components/SentinelsSatelliteMap'), // Asegúrate que la ruta sea correcta
+ {
+  ssr: false, // ¡Esta es la clave para solucionar el error!
+  loading: () => <p>Cargando Mapa...</p>, // Opcional: Un indicador de carga
+ }
+);
 
 export interface DateRange {
   start: string | null;
@@ -83,7 +83,7 @@ export default function HomePage() {
     </div> */}
 
         {/* MAPA SATELITAL */}
-        <div
+        {/* <div
           className={`flex-1 min-h-0 rounded-xl overflow-hidden border border-white`}
         >
           <SatelliteMap
@@ -92,16 +92,16 @@ export default function HomePage() {
             layer={layer}
             selectedDate={dateRange.start || dayjs().format("YYYY-MM-DD")}
           />
-        </div>
+        </div> */}
 
         {/* MAPA SATELITAL CON CAPA DE SENTINELS */}
-        {/* <div style={{ height: '80vh', width: '100%' }}>
-    <DynamicSentinelsSatelliteMap 
-      targetLocation={targetLocation} 
-      isGlobalView={isGlobalView} 
-      selectedDate={getSentinelDateString(dateRange)}
-    />
-   </div> */}
+        <div style={{ height: '80vh', width: '100%' }}>
+          <DynamicSentinelsSatelliteMap 
+            targetLocation={targetLocation} 
+            isGlobalView={isGlobalView} 
+            selectedDate={getSentinelDateString(dateRange)}
+          />
+        </div>
 
         {/* Gráfico de Series Temporales */}
         <div

@@ -1,8 +1,10 @@
-export const PLACES_API_URL = `https://photon.komoot.io/api`;
+export const PLACES_API_URL = "https://photon.komoot.io/api";
 
-export const API_URL = `http://localhost:5000/api`;
+export const API_URL = "http://localhost:5000/api";
 
 export const SENTINEL_INSTANCE_ID="f0d46556-6af0-4dd7-ae8d-43fe6daaa16f";
+export const SENTINEL_CLIENT_ID = "502d22ee-8d06-4e04-b830-40d6906dabf9";
+export const SENTINEL_CLIENT_SECRET = "ak4rPhuXGyzEIf3bAJcf0Ael7TAeChpQ";
 
 export const BLUE_YONDER="#2E96F5";
 export const NEON_BLUE="#0960E1";
